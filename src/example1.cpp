@@ -285,7 +285,7 @@ public:
         new Label(window, "File dialog", "sans-bold");
         tools = new Widget(window);
         tools->setLayout(new BoxLayout(Orientation::Horizontal,
-                                       Alignment::Middle, 0, 6));
+                                       Alignment::Middle, 0, 4));
         b = new Button(tools, "Open");
         b->setCallback([&] {
             cout << "File dialog result: " << file_dialog(
@@ -295,6 +295,18 @@ public:
         b->setCallback([&] {
             cout << "File dialog result: " << file_dialog(
                     { {"png", "Portable Network Graphics"}, {"txt", "Text file"} }, true) << endl;
+        });
+
+        new Label(window, "Folder dialog", "sans-bold");
+        tools = new Widget(window);
+        tools->setLayout(new BoxLayout(Orientation::Horizontal,
+                                     Alignment::Middle, 0, 20));
+        b = new Button(tools, "Open");
+        b->setCallback([&] {
+            cout << "Folder dialog result: " << endl;
+            auto folders = folder_dialog();
+            for(auto f : folders)
+              cout << f << endl;
         });
 
         new Label(window, "Combo box", "sans-bold");

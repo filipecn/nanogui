@@ -337,6 +337,49 @@ std::vector<std::string> file_dialog(const std::vector<std::pair<std::string, st
     return result;
 #endif
 }
+
+std::vector<std::string> folder_dialog() {
+    static const int FILE_DIALOG_MAX_BUFFER = 16384;
+
+#if defined(_WIN32)
+    std::vector<std::string> result;
+    throw std::runtime_error("folder_dialog not supported on windows!");
+    return result;
+#else
+    char buffer[FILE_DIALOG_MAX_BUFFER];
+    buffer[0] = '\0';
+
+    std::string cmd = "zenity --file-selection ";
+    // The safest separator for multiple selected paths is /, since / can never occur
+    // in file names. Only where two paths are concatenated will there be two / following
+    // each other.
+    cmd += "--multiple --separator=\"/\" ";
+    cmd += "--directory";
+    FILE *output = popen(cmd.c_str(), "r");
+    if (output == nullptr)
+        throw std::runtime_error("popen() failed -- could not launch zenity!");
+    while (fgets(buffer, FILE_DIALOG_MAX_BUFFER, output) != NULL)
+        ;
+    pclose(output);
+    std::string paths(buffer);
+    paths.erase(std::remove(paths.begin(), paths.end(), '\n'), paths.end());
+
+    std::vector<std::string> result;
+    while (!paths.empty()) {
+        size_t end = paths.find("//");
+        if (end == std::string::npos) {
+            result.emplace_back(paths);
+            paths = "";
+        } else {
+            result.emplace_back(paths.substr(0, end));
+            paths = paths.substr(end + 1);
+        }
+    }
+
+    return result;
+#endif
+
+}
 #endif
 
 void Object::decRef(bool dealloc) const noexcept {
